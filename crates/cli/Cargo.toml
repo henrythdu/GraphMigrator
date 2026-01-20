@@ -1,0 +1,11 @@
+[package]
+name = "graph-migrator-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core library
+graph-migrator-core = { path = "../core" }
+
+# CLI argument parsing with derive feature
+clap = { workspace = true }
