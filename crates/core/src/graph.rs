@@ -5,6 +5,7 @@
 //! nodes transition from Pending → Migrated → Superseded.
 
 use petgraph::stable_graph::StableGraph;
+use petgraph::visit::{EdgeRef, IntoEdgeReferences};
 use serde::{Deserialize, Serialize};
 
 /// A node in the dependency graph representing a code element
@@ -124,6 +125,24 @@ impl Graph {
     /// Iterate over all node weights in the graph
     pub fn nodes(&self) -> impl Iterator<Item = &Node> {
         self.inner.node_weights()
+    }
+
+    /// Iterate over all edge weights in the graph
+    pub fn edges(&self) -> impl Iterator<Item = &Edge> {
+        self.inner.edge_weights()
+    }
+
+    /// Get edge endpoints for testing verification
+    ///
+    /// Returns an iterator of (from_node_index, to_node_index, edge_weight) tuples
+    /// for all edges in the graph. This enables tests to verify edge wiring
+    /// by asserting both endpoints and edge type.
+    pub fn edge_endpoints(
+        &self,
+    ) -> impl Iterator<Item = (petgraph::stable_graph::NodeIndex, petgraph::stable_graph::NodeIndex, &Edge)> {
+        self.inner
+            .edge_references()
+            .map(|e| (e.source(), e.target(), e.weight()))
     }
 }
 
