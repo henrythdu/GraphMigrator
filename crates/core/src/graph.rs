@@ -120,6 +120,11 @@ impl Graph {
     pub fn edge_count(&self) -> usize {
         self.inner.edge_count()
     }
+
+    /// Iterate over all node weights in the graph
+    pub fn nodes(&self) -> impl Iterator<Item = &Node> {
+        self.inner.node_weights()
+    }
 }
 
 impl Default for Graph {

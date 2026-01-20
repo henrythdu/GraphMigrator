@@ -8,3 +8,5 @@ edition = "2021"
 petgraph = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
+tree-sitter = "0.26"
+tree-sitter-python = "0.25"
