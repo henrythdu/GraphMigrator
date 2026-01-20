@@ -36,9 +36,10 @@ Set up the minimal two-crate workspace that compiles and runs, with placeholder 
 
 ### 1.3 Create CLI Crate
 
-- `crates/cli/Cargo.toml` depending on `graph-migrator-core`
-- `crates/cli/src/main.rs` that calls core and prints version
-- Add clap dependency for future CLI parsing
+- `crates/cli/Cargo.toml` depending on `graph-migrator-core` and `clap` with derive feature
+- `crates/cli/src/main.rs` using `clap` derive macro (`#[derive(Parser)]`)
+- Use `#[command(version = "0.1.0")]` to handle `--version` automatically
+- This establishes the CLI pattern for future commands (no refactoring needed later)
 
 ### 1.4 Verify Build
 
