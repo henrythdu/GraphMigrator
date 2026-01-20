@@ -53,6 +53,25 @@ This project uses **Serena MCP** for codebase navigation and semantic operations
 
 **IMPORTANT:** Always prefer Serena's semantic tools over raw text editing for code changes.
 
+## Planning Workflow: Rolling Wave
+
+This project uses **rolling wave planning** for implementation:
+
+- **Epic N**: Detailed plan with tasks, dependencies, acceptance criteria
+- **Epic N+1**: Theme only (title, goal, rough scope)
+- **No pre-declaring total epics** — let work emerge naturally
+- **Re-evaluate after each epic** — adjust based on what you learned
+
+**Process:**
+1. Plan Epic 1 (detailed) + Epic 2 (theme only)
+2. Implement Epic 1
+3. Close Epic 1 → Detail Epic 2 → Add Epic 3 (theme only)
+4. Repeat until phase complete
+
+**Documentation:**
+- Epic plans live in `docs/plans/YYYY-MM-DD-epicN-<name>.md`
+- Each plan includes: goal, scope, tasks, acceptance criteria, next epic theme
+
 ## Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
