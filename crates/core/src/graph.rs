@@ -144,6 +144,37 @@ impl Graph {
             .edge_references()
             .map(|e| (e.source(), e.target(), e.weight()))
     }
+
+    /// Get all node indices in the graph
+    pub fn node_indices(&self) -> impl Iterator<Item = petgraph::stable_graph::NodeIndex> + '_ {
+        self.inner.node_indices()
+    }
+
+    /// Get all edge indices in the graph
+    pub fn edge_indices(&self) -> impl Iterator<Item = petgraph::stable_graph::EdgeIndex> + '_ {
+        self.inner.edge_indices()
+    }
+
+    /// Get the endpoints of a specific edge
+    ///
+    /// Returns None if the edge index is invalid
+    pub fn edge_endpoints_for(
+        &self,
+        edge_index: petgraph::stable_graph::EdgeIndex,
+    ) -> Option<(petgraph::stable_graph::NodeIndex, petgraph::stable_graph::NodeIndex)> {
+        self.inner.edge_endpoints(edge_index)
+    }
+
+    /// Find a node by its ID
+    ///
+    /// Returns the node index if found, None otherwise.
+    ///
+    /// **Note**: This performs a linear scan over all nodes and has O(N) complexity.
+    /// For performance-sensitive code, consider maintaining a separate ID-to-index map.
+    pub fn find_node_by_id(&self, id: &str) -> Option<petgraph::stable_graph::NodeIndex> {
+        self.node_indices()
+            .find(|&idx| self.node_weight(idx).map(|n| n.id.as_str()) == Some(id))
+    }
 }
 
 impl Default for Graph {
