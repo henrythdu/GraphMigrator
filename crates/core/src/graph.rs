@@ -68,6 +68,11 @@ pub enum EdgeType {
 ///
 /// Uses `StableGraph` to ensure node indices remain consistent even as
 /// nodes are added/removed during migration tracking.
+///
+/// Note: Does not derive `PartialEq`, `Serialize`, or `Deserialize` because
+/// `StableGraph` doesn't implement these traits. For equality checks,
+/// compare `node_count()` and `edge_count()` or iterate nodes/edges directly.
+#[derive(Debug, Clone)]
 pub struct Graph {
     /// The underlying stable graph (private to enforce encapsulation)
     inner: StableGraph<Node, Edge>,
@@ -97,18 +102,12 @@ impl Graph {
     }
 
     /// Get a node by index
-    pub fn node_weight(
-        &self,
-        index: petgraph::stable_graph::NodeIndex,
-    ) -> Option<&Node> {
+    pub fn node_weight(&self, index: petgraph::stable_graph::NodeIndex) -> Option<&Node> {
         self.inner.node_weight(index)
     }
 
     /// Get an edge by index
-    pub fn edge_weight(
-        &self,
-        index: petgraph::stable_graph::EdgeIndex,
-    ) -> Option<&Edge> {
+    pub fn edge_weight(&self, index: petgraph::stable_graph::EdgeIndex) -> Option<&Edge> {
         self.inner.edge_weight(index)
     }
 
@@ -139,7 +138,13 @@ impl Graph {
     /// by asserting both endpoints and edge type.
     pub fn edge_endpoints(
         &self,
-    ) -> impl Iterator<Item = (petgraph::stable_graph::NodeIndex, petgraph::stable_graph::NodeIndex, &Edge)> {
+    ) -> impl Iterator<
+        Item = (
+            petgraph::stable_graph::NodeIndex,
+            petgraph::stable_graph::NodeIndex,
+            &Edge,
+        ),
+    > {
         self.inner
             .edge_references()
             .map(|e| (e.source(), e.target(), e.weight()))
@@ -161,7 +166,10 @@ impl Graph {
     pub fn edge_endpoints_for(
         &self,
         edge_index: petgraph::stable_graph::EdgeIndex,
-    ) -> Option<(petgraph::stable_graph::NodeIndex, petgraph::stable_graph::NodeIndex)> {
+    ) -> Option<(
+        petgraph::stable_graph::NodeIndex,
+        petgraph::stable_graph::NodeIndex,
+    )> {
         self.inner.edge_endpoints(edge_index)
     }
 

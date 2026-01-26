@@ -5,6 +5,7 @@
 
 pub mod discovery;
 pub mod graph;
+pub mod import;
 pub mod parser;
 pub mod queries;
 

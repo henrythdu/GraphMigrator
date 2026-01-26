@@ -75,6 +75,10 @@ impl Default for Parser {
 /// This structure is designed as the foundation for Epic 7's two-pass
 /// resolution. It contains the merged graph plus provenance metadata
 /// needed for future cross-file edge creation.
+///
+/// Note: Does not derive `PartialEq`, `Serialize`, or `Deserialize` because
+/// internal fields (`node_id_map`, `StableGraph`) don't implement these traits.
+#[derive(Debug, Clone)]
 pub struct MultiFileGraph {
     /// The unified graph containing all nodes and edges from parsed files
     pub graph: crate::Graph,
@@ -139,7 +143,11 @@ impl MultiFileGraph {
     /// - Edge remapping: Edge endpoints are remapped to use the correct node indices
     ///   in the merged graph.
     /// - Provenance tracking: `node_locations` maps each node ID to its source file.
-    pub fn merge_file_graph(&mut self, file_graph: crate::Graph, source_file: &Path) -> anyhow::Result<()> {
+    pub fn merge_file_graph(
+        &mut self,
+        file_graph: crate::Graph,
+        source_file: &Path,
+    ) -> anyhow::Result<()> {
         use petgraph::stable_graph::NodeIndex;
 
         let mut index_map: HashMap<NodeIndex, NodeIndex> = HashMap::new();
@@ -149,7 +157,8 @@ impl MultiFileGraph {
 
         // Add nodes (skip duplicates, track index mappings)
         for node_idx in file_graph.node_indices() {
-            let node = file_graph.node_weight(node_idx)
+            let node = file_graph
+                .node_weight(node_idx)
                 .ok_or_else(|| anyhow::anyhow!("Invalid node index in file graph"))?;
 
             if let Some(&existing_idx) = self.node_id_map.get(&node.id) {
@@ -164,26 +173,32 @@ impl MultiFileGraph {
                 self.node_id_map.insert(node.id.clone(), new_idx);
 
                 // Track provenance
-                self.node_locations.insert(node.id.clone(), source_file.to_path_buf());
+                self.node_locations
+                    .insert(node.id.clone(), source_file.to_path_buf());
             }
         }
 
         // Add edges (remap indices)
         for edge_idx in file_graph.edge_indices() {
-            let (source, target) = file_graph.edge_endpoints_for(edge_idx)
+            let (source, target) = file_graph
+                .edge_endpoints_for(edge_idx)
                 .ok_or_else(|| anyhow::anyhow!("Invalid edge index in file graph"))?;
 
-            let new_source = index_map.get(&source)
+            let new_source = index_map
+                .get(&source)
                 .copied()
                 .ok_or_else(|| anyhow::anyhow!("Source node index not in mapping"))?;
-            let new_target = index_map.get(&target)
+            let new_target = index_map
+                .get(&target)
                 .copied()
                 .ok_or_else(|| anyhow::anyhow!("Target node index not in mapping"))?;
 
-            let edge_weight = file_graph.edge_weight(edge_idx)
+            let edge_weight = file_graph
+                .edge_weight(edge_idx)
                 .ok_or_else(|| anyhow::anyhow!("Invalid edge weight"))?;
 
-            self.graph.add_edge(new_source, new_target, edge_weight.clone());
+            self.graph
+                .add_edge(new_source, new_target, edge_weight.clone());
         }
 
         Ok(())
@@ -333,9 +348,7 @@ mod tests {
         let multi = parse_files(&files).unwrap();
 
         // Find all helper functions
-        let helpers: Vec<_> = multi.graph.nodes()
-            .filter(|n| n.name == "helper")
-            .collect();
+        let helpers: Vec<_> = multi.graph.nodes().filter(|n| n.name == "helper").collect();
 
         // Should have 2 helpers with different IDs
         assert_eq!(helpers.len(), 2);
@@ -354,8 +367,12 @@ mod tests {
 
         // Verify node_locations maps each node to a file in file_nodes
         for (node_id, file_path) in &multi.node_locations {
-            assert!(multi.file_nodes.contains(file_path),
-                "Node {} maps to file {:?} which is not in file_nodes", node_id, file_path);
+            assert!(
+                multi.file_nodes.contains(file_path),
+                "Node {} maps to file {:?} which is not in file_nodes",
+                node_id,
+                file_path
+            );
         }
     }
 
@@ -398,14 +415,16 @@ mod tests {
 
     #[test]
     fn test_edge_preservation() {
-        let files = vec![
-            Path::new("tests/test-fixtures/multi-file-project/module_a.py"),
-        ];
+        let files = vec![Path::new(
+            "tests/test-fixtures/multi-file-project/module_a.py",
+        )];
         let multi = parse_files(&files).unwrap();
 
         // module_a.py has: process() -> helper()
         // Should have at least 1 Calls edge
-        let calls_count = multi.graph.edges()
+        let calls_count = multi
+            .graph
+            .edges()
             .filter(|e| e.edge_type == crate::graph::EdgeType::Calls)
             .count();
 
